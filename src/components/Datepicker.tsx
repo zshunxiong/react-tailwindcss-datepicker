@@ -17,6 +17,7 @@ const Datepicker: React.FC<DatepickerType> = ({
     primaryColor = "blue",
     value = null,
     onChange,
+    onDayPicked,
     useRange = true,
     showFooter = false,
     showShortcuts = false,
@@ -351,6 +352,7 @@ const Datepicker: React.FC<DatepickerType> = ({
                                     date={firstDate}
                                     onClickPrevious={previousMonthFirst}
                                     onClickNext={nextMonthFirst}
+                                    onDayPicked={onDayPicked}
                                     changeMonth={changeFirstMonth}
                                     changeYear={changeFirstYear}
                                     minDate={minDate}
@@ -367,6 +369,7 @@ const Datepicker: React.FC<DatepickerType> = ({
                                             date={secondDate}
                                             onClickPrevious={previousMonthSecond}
                                             onClickNext={nextMonthSecond}
+                                            onDayPicked={onDayPicked}
                                             changeMonth={changeSecondMonth}
                                             changeYear={changeSecondYear}
                                             minDate={minDate}

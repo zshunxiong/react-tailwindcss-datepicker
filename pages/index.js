@@ -37,6 +37,16 @@ export default function Playground() {
         console.log(e);
         console.log("value", value);
     };
+
+    const onDayPicked = async (start, end) => {
+        const days = dayjs(end, "YYYY-MM-DD").diff(dayjs(start, "YYYY-MM-DD"), "days") + 1;
+        if (days > 31) {
+            alert("more den 31");
+            return Promise.resolve(days < 31);
+        }
+        return Promise.resolve(days < 31);
+    };
+
     return (
         <div className="px-4 py-8">
             <Head>
@@ -54,6 +64,7 @@ export default function Playground() {
                     value={value}
                     primaryColor={primaryColor}
                     onChange={handleChange}
+                    onDayPicked={onDayPicked}
                     useRange={useRange}
                     showFooter={showFooter}
                     showShortcuts={showShortcuts}

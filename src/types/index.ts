@@ -57,6 +57,7 @@ export interface DatepickerType {
     primaryColor?: ColorKeys;
     value: DateValueType;
     onChange: (value: DateValueType, e?: HTMLInputElement | null | undefined) => void;
+    onDayPicked?: (start: DateType, end: DateType) => Promise<boolean>;
     useRange?: boolean;
     showFooter?: boolean;
     showShortcuts?: boolean;

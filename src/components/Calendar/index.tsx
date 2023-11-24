@@ -35,6 +35,7 @@ interface Props {
     maxDate?: DateType | null;
     onClickPrevious: () => void;
     onClickNext: () => void;
+    onDayPicked?: (start: DateType, end: DateType) => Promise<boolean>;
     changeMonth: (month: number) => void;
     changeYear: (year: number) => void;
 }
@@ -45,11 +46,13 @@ const Calendar: React.FC<Props> = ({
     maxDate,
     onClickPrevious,
     onClickNext,
+    onDayPicked,
     changeMonth,
     changeYear
 }) => {
     // Contexts
     const {
+        value,
         period,
         changePeriod,
         changeDayHover,
@@ -120,16 +123,38 @@ const Calendar: React.FC<Props> = ({
             let newStart;
             let newEnd = null;
 
-            function chosePeriod(start: string, end: string) {
+            async function chosePeriod(start: string, end: string) {
                 const ipt = input?.current;
-                changeDatepickerValue(
-                    {
-                        startDate: dayjs(start).format(DATE_FORMAT),
-                        endDate: dayjs(end).format(DATE_FORMAT)
-                    },
-                    ipt
-                );
-                hideDatepicker();
+                const startDate = dayjs(start).format(DATE_FORMAT);
+                const endDate = dayjs(end).format(DATE_FORMAT);
+                const resolved = onDayPicked ? await onDayPicked(startDate, endDate) : true;
+                if (resolved) {
+                    changeDatepickerValue(
+                        {
+                            startDate,
+                            endDate
+                        },
+                        ipt
+                    );
+                    hideDatepicker();
+                } else {
+                    if (changeDayHover) {
+                        changeDayHover(null);
+                    }
+                    if (value && value.startDate && value.endDate) {
+                        const startDate = dayjs(value.startDate);
+                        const endDate = dayjs(value.endDate);
+                        const validDate = startDate.isValid() && endDate.isValid();
+                        const condition =
+                            validDate && (startDate.isSame(endDate) || startDate.isBefore(endDate));
+                        if (condition) {
+                            changePeriod({
+                                start: formatDate(startDate),
+                                end: formatDate(endDate)
+                            });
+                        }
+                    }
+                }
             }
 
             if (period.start && period.end) {
@@ -194,7 +219,9 @@ const Calendar: React.FC<Props> = ({
             period.end,
             period.start,
             showFooter,
-            input
+            input,
+            onDayPicked,
+            value
         ]
     );
 
@@ -202,18 +229,18 @@ const Calendar: React.FC<Props> = ({
         (day: number) => {
             const newDate = previousMonth(date);
             clickDay(day, newDate.month() + 1, newDate.year());
-            onClickPrevious();
+            if (period.start && period.end) onClickPrevious();
         },
-        [clickDay, date, onClickPrevious]
+        [clickDay, date, period, onClickPrevious]
     );
 
     const clickNextDays = useCallback(
         (day: number) => {
             const newDate = nextMonth(date);
             clickDay(day, newDate.month() + 1, newDate.year());
-            onClickNext();
+            if (period.start && period.end) onClickNext();
         },
-        [clickDay, date, onClickNext]
+        [clickDay, date, period, onClickNext]
     );
 
     // UseEffects & UseLayoutEffect
