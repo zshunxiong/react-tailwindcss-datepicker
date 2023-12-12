@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useWindowSize } from "usehooks-ts";
 
 import Calendar from "../components/Calendar";
 import Footer from "../components/Footer";
@@ -333,14 +334,16 @@ const Datepicker: React.FC<DatepickerType> = ({
     const [togglePos, setTogglePos] = useState<DOMRect>();
 
     // 更新位置 function
-    const resetPosition = (rect?: DOMRect) => {
-        if (isFixed && rect) setTogglePos(rect);
+    const resetPosition = (inputRect?: DOMRect) => {
+        if (isFixed && inputRect) {
+            setTogglePos(inputRect);
+        }
     };
 
     // 按照 popoverDirection，預處理要帶入的位置參數
+    const { height } = useWindowSize();
     const dropdownPos = useMemo(() => {
         if (!isFixed || !togglePos) return undefined;
-
         let defaultPos: {
             top?: number;
             bottom?: number;
@@ -349,15 +352,17 @@ const Datepicker: React.FC<DatepickerType> = ({
             top: togglePos.bottom,
             left: togglePos.left
         };
-
-        if (popoverDirection === "up")
+        const popoverOnUp = popoverDirection === "up";
+        const popoverOnDown = popoverDirection === "down";
+        const calanderHeight = (togglePos.bottom || 0) + 420;
+        if (popoverOnUp || (height < calanderHeight && !popoverOnDown)) {
             defaultPos = {
-                bottom: window.innerHeight - togglePos.top,
+                bottom: height - togglePos.top,
                 left: togglePos.left
             };
-
+        }
         return defaultPos;
-    }, [popoverDirection, isFixed, togglePos]);
+    }, [popoverDirection, isFixed, togglePos, height]);
 
     return (
         <DatepickerContext.Provider value={contextValues}>

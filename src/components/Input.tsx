@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 import React, { useCallback, useContext, useEffect, useRef } from "react";
+import { useWindowSize } from "usehooks-ts";
 
 import { BORDER_COLOR, DATE_FORMAT, RING_COLOR } from "../constants";
 import DatepickerContext from "../contexts/DatepickerContext";
@@ -11,7 +12,7 @@ import { useScrollPosition } from "hooks";
 
 type Props = {
     setContextRef?: (ref: React.RefObject<HTMLInputElement>) => void;
-    resetPosition: (rect?: DOMRect) => void;
+    resetPosition: (inputRect?: DOMRect) => void;
 };
 
 const Input: React.FC<Props> = ({ resetPosition, ...e }: Props) => {
@@ -220,6 +221,7 @@ const Input: React.FC<Props> = ({ resetPosition, ...e }: Props) => {
         inputRef
     ]);
 
+    const { height } = useWindowSize();
     useEffect(() => {
         const div = calendarContainer?.current;
         const input = inputRef.current;
@@ -233,14 +235,10 @@ const Input: React.FC<Props> = ({ resetPosition, ...e }: Props) => {
                 div.classList.add("block");
 
                 // window.innerWidth === 767
-                const popoverOnUp = popoverDirection == "up";
+                const popoverOnUp = popoverDirection === "up";
                 const popoverOnDown = popoverDirection === "down";
-                if (
-                    popoverOnUp ||
-                    (window.innerWidth > 767 &&
-                        window.screen.height - 100 < div.getBoundingClientRect().bottom &&
-                        !popoverOnDown)
-                ) {
+                const calanderHeight = (input?.getBoundingClientRect().bottom || 0) + 420;
+                if (popoverOnUp || (height < calanderHeight && !popoverOnDown)) {
                     div.classList.add("bottom-full");
                     div.classList.add("mb-2.5");
                     div.classList.remove("mt-2.5");
@@ -269,7 +267,7 @@ const Input: React.FC<Props> = ({ resetPosition, ...e }: Props) => {
                 input.removeEventListener("focus", showCalendarContainer);
             }
         };
-    }, [calendarContainer, arrowContainer, popoverDirection, resetPosition]);
+    }, [calendarContainer, arrowContainer, popoverDirection, resetPosition, height]);
 
     // 滾輪移動時關閉日曆
     const scrollPos = useScrollPosition();

@@ -58,7 +58,7 @@ export default function Playground() {
                 </pre>
                 <span className="text-gray-700">PlayGround</span>
             </h1>
-            <div className="h-60">ddd</div>
+            <div className="h-[700px]">ddd</div>
 
             <div className="overflow-auto">
                 <div className="mx-auto flex items-center justify-center w-max my-4">
