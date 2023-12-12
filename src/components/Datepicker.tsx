@@ -1,6 +1,5 @@
 import dayjs from "dayjs";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useWindowSize } from "usehooks-ts";
 
 import Calendar from "../components/Calendar";
 import Footer from "../components/Footer";
@@ -9,7 +8,7 @@ import Shortcuts from "../components/Shortcuts";
 import { COLORS, DATE_FORMAT, DEFAULT_COLOR, LANGUAGE } from "../constants";
 import DatepickerContext from "../contexts/DatepickerContext";
 import { formatDate, nextMonth, previousMonth } from "../helpers";
-import useOnClickOutside, { useScrollPosition } from "../hooks";
+import useOnClickOutside from "../hooks";
 import { Period, DatepickerType, ColorKeys } from "../types";
 
 import { Arrow, VerticalDash } from "./utils";
@@ -332,13 +331,11 @@ const Datepicker: React.FC<DatepickerType> = ({
 
     // 處理 Datepicker 出現位置
     const [togglePos, setTogglePos] = useState<DOMRect>();
-    const { width, height } = useWindowSize();
-    const scrollPos = useScrollPosition();
 
-    // 頁面大小、捲軸變動，更新位置
-    useEffect(() => {
-        if (isFixed && inputRef.current) setTogglePos(inputRef.current.getBoundingClientRect());
-    }, [popoverDirection, width, height, inputRef, scrollPos, isFixed]);
+    // 更新位置 function
+    const resetPosition = (rect?: DOMRect) => {
+        if (isFixed && rect) setTogglePos(rect);
+    };
 
     // 按照 popoverDirection，預處理要帶入的位置參數
     const dropdownPos = useMemo(() => {
@@ -365,7 +362,7 @@ const Datepicker: React.FC<DatepickerType> = ({
     return (
         <DatepickerContext.Provider value={contextValues}>
             <div className={containerClassNameOverload} ref={containerRef}>
-                <Input setContextRef={setInputRef} />
+                <Input setContextRef={setInputRef} resetPosition={resetPosition} />
                 <div
                     className={`transition-all ease-out duration-300 ${
                         isFixed ? "fixed" : "absolute"

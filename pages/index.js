@@ -58,87 +58,97 @@ export default function Playground() {
                 </pre>
                 <span className="text-gray-700">PlayGround</span>
             </h1>
+            <div className="h-60">ddd</div>
 
-            <div className="max-w-md mx-auto my-4">
-                <Datepicker
-                    value={value}
-                    primaryColor={primaryColor}
-                    onChange={handleChange}
-                    onDayPicked={onDayPicked}
-                    useRange={useRange}
-                    showFooter={showFooter}
-                    showShortcuts={showShortcuts}
-                    configs={{
-                        shortcuts: {
-                            today: "TText",
-                            yesterday: "YText",
-                            past: period => `P-${period} Text`,
-                            currentMonth: "CMText",
-                            pastMonth: "PMText",
-                            last3Days: {
-                                text: "Last 3 days",
-                                period: {
-                                    start: new Date(new Date().setDate(new Date().getDate() - 3)),
-                                    end: new Date()
+            <div className="overflow-auto">
+                <div className="mx-auto flex items-center justify-center w-max my-4">
+                    <div className="w-60">somthing long</div>
+                    <div className="w-60">somthing long</div>
+                    <div className="w-60">somthing long</div>
+                    <Datepicker
+                        isFixed
+                        value={value}
+                        primaryColor={primaryColor}
+                        onChange={handleChange}
+                        onDayPicked={onDayPicked}
+                        useRange={useRange}
+                        showFooter={showFooter}
+                        showShortcuts={showShortcuts}
+                        configs={{
+                            shortcuts: {
+                                today: "TText",
+                                yesterday: "YText",
+                                past: period => `P-${period} Text`,
+                                currentMonth: "CMText",
+                                pastMonth: "PMText",
+                                last3Days: {
+                                    text: "Last 3 days",
+                                    period: {
+                                        start: new Date(
+                                            new Date().setDate(new Date().getDate() - 3)
+                                        ),
+                                        end: new Date()
+                                    }
+                                },
+                                thisDay: {
+                                    text: "This Day",
+                                    period: {
+                                        start: new Date(),
+                                        end: new Date()
+                                    }
+                                },
+                                next8Days: {
+                                    text: "Next 8 days",
+                                    period: {
+                                        start: new Date(),
+                                        end: new Date(new Date().setDate(new Date().getDate() + 8))
+                                    }
                                 }
                             },
-                            thisDay: {
-                                text: "This Day",
-                                period: {
-                                    start: new Date(),
-                                    end: new Date()
-                                }
-                            },
-                            next8Days: {
-                                text: "Next 8 days",
-                                period: {
-                                    start: new Date(),
-                                    end: new Date(new Date().setDate(new Date().getDate() + 8))
-                                }
+                            footer: {
+                                cancel: "CText",
+                                apply: "AText"
                             }
-                        },
-                        footer: {
-                            cancel: "CText",
-                            apply: "AText"
+                        }}
+                        asSingle={asSingle}
+                        placeholder={placeholder}
+                        separator={separator}
+                        startFrom={
+                            startFrom.length && dayjs(startFrom).isValid()
+                                ? new Date(startFrom)
+                                : null
                         }
-                    }}
-                    asSingle={asSingle}
-                    placeholder={placeholder}
-                    separator={separator}
-                    startFrom={
-                        startFrom.length && dayjs(startFrom).isValid() ? new Date(startFrom) : null
-                    }
-                    i18n={i18n}
-                    disabled={disabled}
-                    inputClassName={inputClassName}
-                    containerClassName={containerClassName}
-                    toggleClassName={toggleClassName}
-                    displayFormat={displayFormat}
-                    readOnly={readOnly}
-                    minDate={minDate}
-                    maxDate={maxDate}
-                    dateLooking={dateLooking}
-                    disabledDates={disabledDates}
-                    startWeekOn={startWeekOn}
-                    toggleIcon={isEmpty => {
-                        return isEmpty ? "Select Date" : "Clear";
-                    }}
-                    popoverDirection={"down"}
-                    // classNames={{
-                    //     input: ({ disabled, readOnly, className }) => {
-                    //         if (disabled) {
-                    //             return "opacity-40";
-                    //         }
-                    //         return `className`;
-                    //     },
-                    //     toggleButton: () => {
-                    //         return "bg-blue-300 ease-in-out";
-                    //     },
-                    //     footer: () => {
-                    //         return `p-4 border-t border-gray-600 flex flex-row flex-wrap justify-end`;
-                    //     }
-                    // }}
-                />
+                        i18n={i18n}
+                        disabled={disabled}
+                        inputClassName={inputClassName}
+                        containerClassName={containerClassName}
+                        toggleClassName={toggleClassName}
+                        displayFormat={displayFormat}
+                        readOnly={readOnly}
+                        minDate={minDate}
+                        maxDate={maxDate}
+                        dateLooking={dateLooking}
+                        disabledDates={disabledDates}
+                        startWeekOn={startWeekOn}
+                        toggleIcon={isEmpty => {
+                            return isEmpty ? "Select Date" : "Clear";
+                        }}
+                        // classNames={{
+                        //     input: ({ disabled, readOnly, className }) => {
+                        //         if (disabled) {
+                        //             return "opacity-40";
+                        //         }
+                        //         return `className`;
+                        //     },
+                        //     toggleButton: () => {
+                        //         return "bg-blue-300 ease-in-out";
+                        //     },
+                        //     footer: () => {
+                        //         return `p-4 border-t border-gray-600 flex flex-row flex-wrap justify-end`;
+                        //     }
+                        // }}
+                    />
+                </div>
             </div>
             <div className="py-4 max-w-3xl mx-auto flex flex-row flex-wrap">
                 <div className="w-full sm:w-1/3 pr-2 flex flex-row flex-wrap sm:flex-col">

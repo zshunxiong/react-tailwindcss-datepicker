@@ -7,11 +7,14 @@ import { dateIsValid, parseFormattedDate } from "../helpers";
 
 import ToggleButton from "./ToggleButton";
 
+import { useScrollPosition } from "hooks";
+
 type Props = {
     setContextRef?: (ref: React.RefObject<HTMLInputElement>) => void;
+    resetPosition: (rect?: DOMRect) => void;
 };
 
-const Input: React.FC<Props> = (e: Props) => {
+const Input: React.FC<Props> = ({ resetPosition, ...e }: Props) => {
     // Context
     const {
         primaryColor,
@@ -224,6 +227,8 @@ const Input: React.FC<Props> = (e: Props) => {
 
         function showCalendarContainer() {
             if (arrow && div && div.classList.contains("hidden")) {
+                resetPosition(input?.getBoundingClientRect());
+
                 div.classList.remove("hidden");
                 div.classList.add("block");
 
@@ -264,7 +269,17 @@ const Input: React.FC<Props> = (e: Props) => {
                 input.removeEventListener("focus", showCalendarContainer);
             }
         };
-    }, [calendarContainer, arrowContainer, popoverDirection]);
+    }, [calendarContainer, arrowContainer, popoverDirection, resetPosition]);
+
+    // 滾輪移動時關閉日曆
+    const scrollPos = useScrollPosition();
+    useEffect(() => {
+        const input = inputRef.current;
+        if (input) {
+            input.blur();
+        }
+        hideDatepicker();
+    }, [scrollPos, hideDatepicker]);
 
     return (
         <>
