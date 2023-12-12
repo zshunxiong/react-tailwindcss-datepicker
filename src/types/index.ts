@@ -83,6 +83,7 @@ export interface DatepickerType {
     disabledDates?: DateRangeType[] | null;
     startWeekOn?: string | null;
     popoverDirection?: PopoverDirectionType;
+    isFixed?: boolean;
 }
 
 export type ColorKeys = (typeof COLORS)[number]; // "blue" | "orange"

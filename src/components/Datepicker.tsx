@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useWindowSize } from "usehooks-ts";
 
 import Calendar from "../components/Calendar";
 import Footer from "../components/Footer";
@@ -8,7 +9,7 @@ import Shortcuts from "../components/Shortcuts";
 import { COLORS, DATE_FORMAT, DEFAULT_COLOR, LANGUAGE } from "../constants";
 import DatepickerContext from "../contexts/DatepickerContext";
 import { formatDate, nextMonth, previousMonth } from "../helpers";
-import useOnClickOutside from "../hooks";
+import useOnClickOutside, { useScrollPosition } from "../hooks";
 import { Period, DatepickerType, ColorKeys } from "../types";
 
 import { Arrow, VerticalDash } from "./utils";
@@ -42,7 +43,8 @@ const Datepicker: React.FC<DatepickerType> = ({
     inputName,
     startWeekOn = "sun",
     classNames = undefined,
-    popoverDirection = undefined
+    popoverDirection = undefined,
+    isFixed = false
 }) => {
     // Ref
     const containerRef = useRef<HTMLDivElement | null>(null);
@@ -328,13 +330,44 @@ const Datepicker: React.FC<DatepickerType> = ({
             : defaultContainerClassName;
     }, [containerClassName]);
 
+    // 處理 Datepicker 出現位置
+    const [togglePos, setTogglePos] = useState<DOMRect>();
+    const { width, height } = useWindowSize();
+    const scrollPos = useScrollPosition();
+
+    // 頁面大小、捲軸變動，更新位置
+    useEffect(() => {
+        if (isFixed && inputRef.current) setTogglePos(inputRef.current.getBoundingClientRect());
+    }, [popoverDirection, width, height, inputRef, scrollPos, isFixed]);
+
+    // 按照 popoverDirection，預處理要帶入的位置參數
+    const dropdownPos = useMemo(() => {
+        if (!isFixed || !togglePos) return undefined;
+
+        let defaultPos: {
+            top?: number;
+            bottom?: number;
+        } = {
+            top: togglePos.bottom
+        };
+
+        if (popoverDirection === "up")
+            defaultPos = {
+                bottom: window.innerHeight - togglePos.top
+            };
+
+        return defaultPos;
+    }, [popoverDirection, isFixed, togglePos]);
+
     return (
         <DatepickerContext.Provider value={contextValues}>
             <div className={containerClassNameOverload} ref={containerRef}>
                 <Input setContextRef={setInputRef} />
-
                 <div
-                    className="transition-all ease-out duration-300 absolute z-10 mt-[1px] text-sm lg:text-xs 2xl:text-sm translate-y-4 opacity-0 hidden"
+                    className={`transition-all ease-out duration-300 ${
+                        isFixed ? "fixed" : "absolute"
+                    } z-10 mt-[1px] text-sm lg:text-xs 2xl:text-sm translate-y-4 opacity-0 hidden`}
+                    style={dropdownPos}
                     ref={calendarContainerRef}
                 >
                     <Arrow ref={arrowRef} />
