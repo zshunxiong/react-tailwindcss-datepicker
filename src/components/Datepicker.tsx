@@ -179,13 +179,13 @@ const Datepicker: React.FC<DatepickerType> = ({
             const screenCenter = window.innerWidth / 2;
             const containerCenter = (detail.right - detail.x) / 2 + detail.x;
 
-            if (containerCenter > screenCenter) {
+            if (!isFixed && containerCenter > screenCenter) {
                 arrow.classList.add("right-0");
                 arrow.classList.add("mr-3.5");
                 calendarContainer.classList.add("right-0");
             }
         }
-    }, []);
+    }, [isFixed]);
 
     useEffect(() => {
         if (value && value.startDate && value.endDate) {
@@ -347,13 +347,16 @@ const Datepicker: React.FC<DatepickerType> = ({
         let defaultPos: {
             top?: number;
             bottom?: number;
+            left: number;
         } = {
-            top: togglePos.bottom
+            top: togglePos.bottom,
+            left: togglePos.left
         };
 
         if (popoverDirection === "up")
             defaultPos = {
-                bottom: window.innerHeight - togglePos.top
+                bottom: window.innerHeight - togglePos.top,
+                left: togglePos.left
             };
 
         return defaultPos;
