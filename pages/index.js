@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import Head from "next/head";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import Datepicker from "../src";
 import { COLORS, DATE_LOOKING_OPTIONS } from "../src/constants";
@@ -31,6 +31,7 @@ export default function Playground() {
     const [newDisabledDates, setNewDisabledDates] = useState({ startDate: "", endDate: "" });
     const [startFrom, setStartFrom] = useState("2023-03-01");
     const [startWeekOn, setStartWeekOn] = useState("");
+    const inputRef = useRef(null);
 
     const handleChange = (value, e) => {
         setValue(value);
@@ -52,20 +53,27 @@ export default function Playground() {
             <Head>
                 <title>react-tailwindcss-datepicker PlayGround</title>
             </Head>
+            <button
+                type="button"
+                onClick={() => {
+                    inputRef.current.focus();
+                }}
+            >
+                focus input
+            </button>
             <h1 className="text-center font-semibold text-xl">
                 <pre className="text-gray-600 text-lg bg-gray-200 max-w-max mx-auto px-2 rounded">
                     react-tailwindcss-datepicker
                 </pre>
                 <span className="text-gray-700">PlayGround</span>
             </h1>
-            <div className="h-[700px]">ddd</div>
-
             <div className="overflow-auto">
                 <div className="mx-auto flex items-center justify-center w-max my-4">
                     <div className="w-60">somthing long</div>
                     <div className="w-60">somthing long</div>
                     <div className="w-60">somthing long</div>
                     <Datepicker
+                        ref={inputRef}
                         isFixed
                         value={value}
                         primaryColor={primaryColor}

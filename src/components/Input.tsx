@@ -1,5 +1,12 @@
 import dayjs from "dayjs";
-import React, { useCallback, useContext, useEffect, useRef } from "react";
+import React, {
+    forwardRef,
+    useCallback,
+    useContext,
+    useEffect,
+    useImperativeHandle,
+    useRef
+} from "react";
 import { useWindowSize } from "usehooks-ts";
 
 import { BORDER_COLOR, DATE_FORMAT, RING_COLOR } from "../constants";
@@ -15,7 +22,7 @@ type Props = {
     resetPosition: (inputRect?: DOMRect) => void;
 };
 
-const Input: React.FC<Props> = ({ resetPosition, ...e }: Props) => {
+const Input = forwardRef<HTMLInputElement, Props>(({ resetPosition, ...e }, outerRef) => {
     // Context
     const {
         primaryColor,
@@ -279,6 +286,10 @@ const Input: React.FC<Props> = ({ resetPosition, ...e }: Props) => {
         hideDatepicker();
     }, [scrollPos, hideDatepicker]);
 
+    // 處理外部 ref 和內部 ref
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    useImperativeHandle(outerRef, () => inputRef.current!);
+
     return (
         <>
             <input
@@ -311,6 +322,7 @@ const Input: React.FC<Props> = ({ resetPosition, ...e }: Props) => {
             </button>
         </>
     );
-};
+});
+Input.displayName = "Input";
 
 export default Input;
