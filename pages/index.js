@@ -1,9 +1,10 @@
 import dayjs from "dayjs";
+import dynamic from "next/dynamic";
 import Head from "next/head";
 import { useRef, useState } from "react";
 
-import Datepicker from "../src";
 import { COLORS, DATE_LOOKING_OPTIONS } from "../src/constants";
+const Datepicker = dynamic(import("../src"), { ssr: false });
 
 export default function Playground() {
     const [value, setValue] = useState({
@@ -67,6 +68,8 @@ export default function Playground() {
                 </pre>
                 <span className="text-gray-700">PlayGround</span>
             </h1>
+            <div className="h-96">afnaw</div>
+            <div className="h-96">afnaw</div>
             <div className="overflow-auto">
                 <div className="mx-auto flex items-center justify-center w-max my-4">
                     <div className="w-60">somthing long</div>
@@ -74,7 +77,6 @@ export default function Playground() {
                     <div className="w-60">somthing long</div>
                     <Datepicker
                         ref={inputRef}
-                        isFixed
                         value={value}
                         primaryColor={primaryColor}
                         onChange={handleChange}
@@ -141,6 +143,7 @@ export default function Playground() {
                         toggleIcon={isEmpty => {
                             return isEmpty ? "Select Date" : "Clear";
                         }}
+                        // popoverDirection="down"
                         // classNames={{
                         //     input: ({ disabled, readOnly, className }) => {
                         //         if (disabled) {

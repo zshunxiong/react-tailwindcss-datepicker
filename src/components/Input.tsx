@@ -7,7 +7,6 @@ import React, {
     useImperativeHandle,
     useRef
 } from "react";
-import { useWindowSize } from "usehooks-ts";
 
 import { BORDER_COLOR, DATE_FORMAT, RING_COLOR } from "../constants";
 import DatepickerContext from "../contexts/DatepickerContext";
@@ -18,19 +17,17 @@ import ToggleButton from "./ToggleButton";
 import { useScrollPosition } from "hooks";
 
 type Props = {
+    setTipperTrue: () => void;
     setContextRef?: (ref: React.RefObject<HTMLInputElement>) => void;
-    resetPosition: (inputRect?: DOMRect) => void;
 };
 
-const Input = forwardRef<HTMLInputElement, Props>(({ resetPosition, ...e }, outerRef) => {
+const Input = forwardRef<HTMLInputElement, Props>(({ setTipperTrue, ...e }, outerRef) => {
     // Context
     const {
         primaryColor,
         period,
         dayHover,
         changeDayHover,
-        calendarContainer,
-        arrowContainer,
         inputText,
         changeInputText,
         hideDatepicker,
@@ -46,8 +43,7 @@ const Input = forwardRef<HTMLInputElement, Props>(({ resetPosition, ...e }, oute
         displayFormat,
         inputId,
         inputName,
-        classNames,
-        popoverDirection
+        classNames
     } = useContext(DatepickerContext);
 
     // UseRefs
@@ -228,54 +224,6 @@ const Input = forwardRef<HTMLInputElement, Props>(({ resetPosition, ...e }, oute
         inputRef
     ]);
 
-    const { height } = useWindowSize();
-    useEffect(() => {
-        const div = calendarContainer?.current;
-        const input = inputRef.current;
-        const arrow = arrowContainer?.current;
-
-        function showCalendarContainer() {
-            if (arrow && div && div.classList.contains("hidden")) {
-                resetPosition(input?.getBoundingClientRect());
-
-                div.classList.remove("hidden");
-                div.classList.add("block");
-
-                // window.innerWidth === 767
-                const popoverOnUp = popoverDirection === "up";
-                const popoverOnDown = popoverDirection === "down";
-                const calanderHeight = (input?.getBoundingClientRect().bottom || 0) + 420;
-                if (popoverOnUp || (height < calanderHeight && !popoverOnDown)) {
-                    div.classList.add("bottom-full");
-                    div.classList.add("mb-2.5");
-                    div.classList.remove("mt-2.5");
-                    arrow.classList.add("-bottom-2");
-                    arrow.classList.add("border-r");
-                    arrow.classList.add("border-b");
-                    arrow.classList.remove("border-l");
-                    arrow.classList.remove("border-t");
-                }
-
-                setTimeout(() => {
-                    div.classList.remove("translate-y-4");
-                    div.classList.remove("opacity-0");
-                    div.classList.add("translate-y-0");
-                    div.classList.add("opacity-1");
-                }, 1);
-            }
-        }
-
-        if (div && input) {
-            input.addEventListener("focus", showCalendarContainer);
-        }
-
-        return () => {
-            if (input) {
-                input.removeEventListener("focus", showCalendarContainer);
-            }
-        };
-    }, [calendarContainer, arrowContainer, popoverDirection, resetPosition, height]);
-
     // 滾輪移動時關閉日曆
     const scrollPos = useScrollPosition();
     useEffect(() => {
@@ -310,6 +258,8 @@ const Input = forwardRef<HTMLInputElement, Props>(({ resetPosition, ...e }, oute
                 role="presentation"
                 onChange={handleInputChange}
                 onKeyDown={handleInputKeyDown}
+                onClick={!disabled ? setTipperTrue : undefined}
+                onFocus={!disabled ? setTipperTrue : undefined}
             />
 
             <button

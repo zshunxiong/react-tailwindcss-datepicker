@@ -1,6 +1,7 @@
+import Tippy from "@tippyjs/react";
 import dayjs from "dayjs";
 import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useWindowSize } from "usehooks-ts";
+import { useBoolean, useWindowSize } from "usehooks-ts";
 
 import Calendar from "../components/Calendar";
 import Footer from "../components/Footer";
@@ -9,7 +10,6 @@ import Shortcuts from "../components/Shortcuts";
 import { COLORS, DATE_FORMAT, DEFAULT_COLOR, LANGUAGE } from "../constants";
 import DatepickerContext from "../contexts/DatepickerContext";
 import { formatDate, nextMonth, previousMonth } from "../helpers";
-import useOnClickOutside from "../hooks";
 import { Period, DatepickerType, ColorKeys } from "../types";
 
 import { Arrow, VerticalDash } from "./utils";
@@ -68,13 +68,11 @@ const Datepicker = forwardRef<HTMLInputElement, DatepickerType>(
         const [inputText, setInputText] = useState<string>("");
         const [inputRef, setInputRef] = useState(React.createRef<HTMLInputElement>());
 
-        // Custom Hooks use
-        useOnClickOutside(containerRef, () => {
-            const container = containerRef.current;
-            if (container) {
-                hideDatepicker();
-            }
-        });
+        const {
+            value: tipperShow,
+            setTrue: setTipperTrue,
+            setFalse: setTipperFalse
+        } = useBoolean(false);
 
         // Functions
         const hideDatepicker = useCallback(() => {
@@ -94,11 +92,48 @@ const Datepicker = forwardRef<HTMLInputElement, DatepickerType>(
                     arrow.classList.remove("-bottom-2");
                     arrow.classList.remove("border-r");
                     arrow.classList.remove("border-b");
+                    arrow.classList.add("-top-2");
                     arrow.classList.add("border-l");
                     arrow.classList.add("border-t");
+                    setTipperFalse();
                 }, 300);
             }
-        }, []);
+        }, [setTipperFalse]);
+
+        const { height } = useWindowSize();
+        const showDatepicker = useCallback(() => {
+            const div = calendarContainerRef?.current;
+            const input = inputRef.current;
+            const arrow = arrowRef?.current;
+
+            if (arrow && div && div.classList.contains("hidden")) {
+                div.classList.remove("hidden");
+                div.classList.add("block");
+
+                // window.innerWidth === 767
+                const popoverOnUp = popoverDirection === "up";
+                // const popoverOnDown = popoverDirection === "down";
+                const calanderHeight = (input?.getBoundingClientRect().bottom || 0) + 420;
+                if (popoverOnUp || height < calanderHeight) {
+                    div.classList.add("bottom-full");
+                    div.classList.add("mb-2.5");
+                    div.classList.remove("mt-2.5");
+                    arrow.classList.add("-bottom-2");
+                    arrow.classList.add("border-r");
+                    arrow.classList.add("border-b");
+                    arrow.classList.remove("-top-2");
+                    arrow.classList.remove("border-l");
+                    arrow.classList.remove("border-t");
+                }
+
+                setTimeout(() => {
+                    div.classList.remove("translate-y-4");
+                    div.classList.remove("opacity-0");
+                    div.classList.add("translate-y-0");
+                    div.classList.add("opacity-1");
+                }, 1);
+            }
+        }, [height, popoverDirection, inputRef]);
 
         /* Start First */
         const firstGotoDate = useCallback(
@@ -244,6 +279,11 @@ const Datepicker = forwardRef<HTMLInputElement, DatepickerType>(
             }
         }, [asSingle, startFrom, value]);
 
+        useEffect(() => {
+            if (tipperShow) showDatepicker();
+            else hideDatepicker();
+        }, [tipperShow, showDatepicker, hideDatepicker]);
+
         // Variables
         const safePrimaryColor = useMemo(() => {
             if (COLORS.includes(primaryColor)) {
@@ -259,6 +299,7 @@ const Datepicker = forwardRef<HTMLInputElement, DatepickerType>(
                 calendarContainer: calendarContainerRef,
                 arrowContainer: arrowRef,
                 hideDatepicker,
+                showDatepicker,
                 period,
                 changePeriod: (newPeriod: Period) => setPeriod(newPeriod),
                 dayHover,
@@ -296,6 +337,7 @@ const Datepicker = forwardRef<HTMLInputElement, DatepickerType>(
             safePrimaryColor,
             configs,
             hideDatepicker,
+            showDatepicker,
             period,
             dayHover,
             inputText,
@@ -334,101 +376,74 @@ const Datepicker = forwardRef<HTMLInputElement, DatepickerType>(
                 : defaultContainerClassName;
         }, [containerClassName]);
 
-        // 處理 Datepicker 出現位置
-        const [togglePos, setTogglePos] = useState<DOMRect>();
-
-        // 更新位置 function
-        const resetPosition = (inputRect?: DOMRect) => {
-            if (isFixed && inputRect) {
-                setTogglePos(inputRect);
-            }
-        };
-
-        // 按照 popoverDirection，預處理要帶入的位置參數
-        const { height } = useWindowSize();
-        const dropdownPos = useMemo(() => {
-            if (!isFixed || !togglePos) return undefined;
-            let defaultPos: {
-                top?: number;
-                bottom?: number;
-                left: number;
-            } = {
-                top: togglePos.bottom,
-                left: togglePos.left
-            };
-            const popoverOnUp = popoverDirection === "up";
-            const popoverOnDown = popoverDirection === "down";
-            const calanderHeight = (togglePos.bottom || 0) + 420;
-            if (popoverOnUp || (height < calanderHeight && !popoverOnDown)) {
-                defaultPos = {
-                    bottom: height - togglePos.top,
-                    left: togglePos.left
-                };
-            }
-            return defaultPos;
-        }, [popoverDirection, isFixed, togglePos, height]);
-
         return (
             <DatepickerContext.Provider value={contextValues}>
                 <div className={containerClassNameOverload} ref={containerRef}>
-                    <Input
-                        setContextRef={setInputRef}
-                        resetPosition={resetPosition}
-                        ref={outerRef}
-                    />
-                    <div
-                        className={`transition-all ease-out duration-300 ${
-                            isFixed ? "fixed" : "absolute"
-                        } z-10 mt-[1px] text-sm lg:text-xs 2xl:text-sm translate-y-4 opacity-0 hidden`}
-                        style={dropdownPos}
-                        ref={calendarContainerRef}
-                    >
-                        <Arrow ref={arrowRef} />
+                    <Tippy
+                        interactive
+                        onClickOutside={setTipperFalse}
+                        appendTo={document.body}
+                        visible={tipperShow}
+                        render={props => (
+                            <div
+                                {...props}
+                                className="transition-all ease-out duration-300 z-10 mt-[1px] text-sm lg:text-xs 2xl:text-sm translate-y-4 opacity-0 hidden"
+                                ref={calendarContainerRef}
+                            >
+                                <Arrow ref={arrowRef} />
 
-                        <div className="mt-2.5 shadow-sm border border-gray-300 px-1 py-0.5 bg-white dark:bg-slate-800 dark:text-white dark:border-slate-600 rounded-lg">
-                            <div className="flex flex-col lg:flex-row py-2">
-                                {showShortcuts && <Shortcuts />}
+                                <div className="mt-2.5 shadow-sm border border-gray-300 px-1 py-0.5 bg-white dark:bg-slate-800 dark:text-white dark:border-slate-600 rounded-lg">
+                                    <div className="flex flex-col lg:flex-row py-2">
+                                        {showShortcuts && <Shortcuts />}
 
-                                <div
-                                    className={`flex items-stretch flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-1.5 ${
-                                        showShortcuts ? "md:pl-2" : "md:pl-1"
-                                    } pr-2 lg:pr-1`}
-                                >
-                                    <Calendar
-                                        date={firstDate}
-                                        onClickPrevious={previousMonthFirst}
-                                        onClickNext={nextMonthFirst}
-                                        onDayPicked={onDayPicked}
-                                        changeMonth={changeFirstMonth}
-                                        changeYear={changeFirstYear}
-                                        minDate={minDate}
-                                        maxDate={maxDate}
-                                    />
-
-                                    {useRange && (
-                                        <>
-                                            <div className="flex items-center">
-                                                <VerticalDash />
-                                            </div>
-
+                                        <div
+                                            className={`flex items-stretch flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-1.5 ${
+                                                showShortcuts ? "md:pl-2" : "md:pl-1"
+                                            } pr-2 lg:pr-1`}
+                                        >
                                             <Calendar
-                                                date={secondDate}
-                                                onClickPrevious={previousMonthSecond}
-                                                onClickNext={nextMonthSecond}
+                                                date={firstDate}
+                                                onClickPrevious={previousMonthFirst}
+                                                onClickNext={nextMonthFirst}
                                                 onDayPicked={onDayPicked}
-                                                changeMonth={changeSecondMonth}
-                                                changeYear={changeSecondYear}
+                                                changeMonth={changeFirstMonth}
+                                                changeYear={changeFirstYear}
                                                 minDate={minDate}
                                                 maxDate={maxDate}
                                             />
-                                        </>
-                                    )}
+
+                                            {useRange && (
+                                                <>
+                                                    <div className="flex items-center">
+                                                        <VerticalDash />
+                                                    </div>
+
+                                                    <Calendar
+                                                        date={secondDate}
+                                                        onClickPrevious={previousMonthSecond}
+                                                        onClickNext={nextMonthSecond}
+                                                        onDayPicked={onDayPicked}
+                                                        changeMonth={changeSecondMonth}
+                                                        changeYear={changeSecondYear}
+                                                        minDate={minDate}
+                                                        maxDate={maxDate}
+                                                    />
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {showFooter && <Footer />}
                                 </div>
                             </div>
-
-                            {showFooter && <Footer />}
-                        </div>
-                    </div>
+                        )}
+                    >
+                        <Input
+                            setContextRef={setInputRef}
+                            setTipperTrue={setTipperTrue}
+                            ref={outerRef}
+                        />
+                    </Tippy>
                 </div>
             </DatepickerContext.Provider>
         );
