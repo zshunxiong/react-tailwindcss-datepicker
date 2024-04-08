@@ -45,8 +45,7 @@ const Datepicker = forwardRef<HTMLInputElement, DatepickerType>(
             inputName,
             startWeekOn = "sun",
             classNames = undefined,
-            popoverDirection = undefined,
-            isFixed = false
+            popoverDirection = undefined
         },
         outerRef
     ) => {
@@ -89,12 +88,6 @@ const Datepicker = forwardRef<HTMLInputElement, DatepickerType>(
                     div.classList.add("hidden");
                     div.classList.add("mb-2.5");
                     div.classList.add("mt-2.5");
-                    arrow.classList.remove("-bottom-2");
-                    arrow.classList.remove("border-r");
-                    arrow.classList.remove("border-b");
-                    arrow.classList.add("-top-2");
-                    arrow.classList.add("border-l");
-                    arrow.classList.add("border-t");
                     setTipperFalse();
                 }, 300);
             }
@@ -118,12 +111,6 @@ const Datepicker = forwardRef<HTMLInputElement, DatepickerType>(
                     div.classList.add("bottom-full");
                     div.classList.add("mb-2.5");
                     div.classList.remove("mt-2.5");
-                    arrow.classList.add("-bottom-2");
-                    arrow.classList.add("border-r");
-                    arrow.classList.add("border-b");
-                    arrow.classList.remove("-top-2");
-                    arrow.classList.remove("border-l");
-                    arrow.classList.remove("border-t");
                 }
 
                 setTimeout(() => {
@@ -206,25 +193,6 @@ const Datepicker = forwardRef<HTMLInputElement, DatepickerType>(
             [secondDate, secondGotoDate]
         );
         /* End Second */
-
-        // UseEffects & UseLayoutEffect
-        useEffect(() => {
-            const container = containerRef.current;
-            const calendarContainer = calendarContainerRef.current;
-            const arrow = arrowRef.current;
-
-            if (container && calendarContainer && arrow) {
-                const detail = container.getBoundingClientRect();
-                const screenCenter = window.innerWidth / 2;
-                const containerCenter = (detail.right - detail.x) / 2 + detail.x;
-
-                if (!isFixed && containerCenter > screenCenter) {
-                    arrow.classList.add("right-0");
-                    arrow.classList.add("mr-3.5");
-                    calendarContainer.classList.add("right-0");
-                }
-            }
-        }, [isFixed]);
 
         useEffect(() => {
             if (value && value.startDate && value.endDate) {
@@ -390,7 +358,10 @@ const Datepicker = forwardRef<HTMLInputElement, DatepickerType>(
                                 className="transition-all ease-out duration-300 z-10 mt-[1px] text-sm lg:text-xs 2xl:text-sm translate-y-4 opacity-0 hidden"
                                 ref={calendarContainerRef}
                             >
-                                <Arrow ref={arrowRef} />
+                                <Arrow
+                                    ref={arrowRef}
+                                    placement={props["data-placement"] as "top" | "bottom"}
+                                />
 
                                 <div className="mt-2.5 shadow-sm border border-gray-300 px-1 py-0.5 bg-white dark:bg-slate-800 dark:text-white dark:border-slate-600 rounded-lg">
                                     <div className="flex flex-col lg:flex-row py-2">

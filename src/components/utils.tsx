@@ -3,6 +3,8 @@ import React, { useCallback, useContext } from "react";
 import { BG_COLOR, BORDER_COLOR, BUTTON_COLOR, RING_COLOR } from "../constants";
 import DatepickerContext from "../contexts/DatepickerContext";
 
+import { classNames } from "helpers";
+
 interface IconProps {
     className: string;
 }
@@ -119,14 +121,19 @@ export const DoubleChevronRightIcon: React.FC<IconProps> = ({ className = "w-6 h
 };
 
 // eslint-disable-next-line react/display-name,@typescript-eslint/ban-types
-export const Arrow = React.forwardRef<HTMLDivElement, {}>((props, ref) => {
-    return (
-        <div
-            ref={ref}
-            className="absolute z-20 h-4 w-4 rotate-45 -top-2 left-1/2 -translate-x-1/2 border-l border-t border-gray-300 bg-white dark:bg-slate-800 dark:border-slate-600"
-        />
-    );
-});
+export const Arrow = React.forwardRef<HTMLDivElement, { placement: "top" | "bottom" }>(
+    ({ placement }, ref) => {
+        return (
+            <div
+                ref={ref}
+                className={classNames(
+                    "absolute z-20 h-4 w-4 rotate-45 left-1/2 -translate-x-1/2 border-gray-300 bg-white dark:bg-slate-800 dark:border-slate-600",
+                    placement === "top" ? "-bottom-2 border-r border-b" : "-top-2 border-l border-t"
+                )}
+            />
+        );
+    }
+);
 
 export const SecondaryButton: React.FC<Button> = ({ children, onClick, disabled = false }) => {
     // Contexts
