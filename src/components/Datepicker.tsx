@@ -350,7 +350,7 @@ const Datepicker = forwardRef<HTMLInputElement, DatepickerType>(
                     <Tippy
                         interactive
                         onClickOutside={setTipperFalse}
-                        appendTo={document.body}
+                        appendTo={document?.body}
                         visible={tipperShow}
                         render={props => (
                             <div
