@@ -1,7 +1,7 @@
 import Tippy from "@tippyjs/react";
 import dayjs from "dayjs";
 import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useBoolean, useWindowSize } from "usehooks-ts";
+import { useBoolean, useIsClient, useWindowSize } from "usehooks-ts";
 
 import Calendar from "../components/Calendar";
 import Footer from "../components/Footer";
@@ -66,6 +66,8 @@ const Datepicker = forwardRef<HTMLInputElement, DatepickerType>(
         const [dayHover, setDayHover] = useState<string | null>(null);
         const [inputText, setInputText] = useState<string>("");
         const [inputRef, setInputRef] = useState(React.createRef<HTMLInputElement>());
+
+        const isClient = useIsClient();
 
         const {
             value: tipperShow,
@@ -350,7 +352,7 @@ const Datepicker = forwardRef<HTMLInputElement, DatepickerType>(
                     <Tippy
                         interactive
                         onClickOutside={setTipperFalse}
-                        appendTo={document?.body}
+                        appendTo={isClient ? document?.body : undefined}
                         visible={tipperShow}
                         render={props => (
                             <div
